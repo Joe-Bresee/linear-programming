@@ -1,0 +1,17 @@
+Idea:
+test out simplex method on a variety of common optimization tasks to see.
+Implementation in python or Go in something relevant to what I'm interested in for the github.
+Test locally on a set of data or something, something similar to: performance, scalability, devops, data mining, mlops, ml.
+
+look up its exponential worse case but why it works in practice
+and klee minty and spielman and teng's smoothed analysis.
+cite dantzigs OG work karmarkar 1984 is a contrast too
+
+Resource scheduling (MLOps flavour) — GPU/CPU allocation across jobs, which maps cleanly to LP SIMPLEX VS INTERIOR POINT
+COMPARE TO DWVAE ANNEALING OPTIMIZATION
+
+revised simplex - cplex / gurobi implement it with LU facotrization?
+
+when does it struggle how do real solvers handle it
+
+hybrid: experiemnt and anchor with a couple papers.
