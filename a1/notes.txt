@@ -19,3 +19,8 @@ Author,Year,Title,Journal/Book,Volume,Pages,Significance
 "Bland, R.G.",1977,"New Finite Pivoting Rules for the Simplex Method","Mathematics of Operations Research",2,103-107,"Prevented cycling with Bland's Rule"
 "Karmarkar, N.",1984,"A New Polynomial-Time Algorithm for Linear Programming","Combinatorica",4,373-395,"Practical polynomial-time interior-point method"
 "Spielman, D.A. and Teng, S.-H.",2004,"Smoothed Analysis of Algorithms: Why the Simplex Algorithm Usually Takes Polynomial Time","Journal of the ACM",51,385-463,"Explained practical efficiency via smoothed analysis"Copied!   
+
+
+plots are good but flag that revised simplex in scipy is known to be inefficient on equality-constrained problems specifically. si it may be an unfair representation of the algorihtm class.
+
+"Industrial Simplex solves a 500-job instance in 0.16 seconds versus 865 seconds for a standard revised Simplex implementation, demonstrating that algorithmic engineering — not the underlying Simplex algorithm — determines practical performance."

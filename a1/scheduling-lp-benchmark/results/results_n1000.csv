@@ -1,0 +1,3 @@
+instance,n_jobs,n_resources,method,success,status,message,time_s,nit
+instance_n1000_r10.npz,1000,10,highs,True,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.20106526800373103,0
+instance_n1000_r10.npz,1000,10,highs-ipm,True,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.12018028999591479,0
