@@ -1,0 +1,61 @@
+Introduction — conjecture, methodology overview
+
+Linear Programming and Optimization is a heavily researched area in algorithmic research in computer science. There is plenty of use case for optimization in industry, and many people researching different ways to 
+achieve it, including even using quantum annealing computing to find optimal solutions easily.
+In class, we have studied the simplex method, which is a "ridge follower", looking for vertices along the polytope graphing the plausible solution area mapped by constraints on a n dimension grid.
+
+In this assignment, I set out to refute the following conjecture:
+"In terms of performance, the Simplex Method is not a competitive
+option for solving LPs in practice."
+
+This is an meaningful claim worth studying as a linear programming student because the simplex method seems to be a key area of understanding in this realm of algorithms and computer science research.
+There are other algorithms used industrially, like for example Highs-Interior Point Method, which is used in industry for large scale linear progrmaming partiularly in energy transition and power systems.
+Additionally, there are multiple versions of the simplex method, like revised simplex method, highs simplex method, or tableau simplex method.
+
+
+Theoretical context — Dantzig, Klee-Minty, Karmarkar, Spielman & Teng
+LP model — formal scheduling problem definition
+Problem: say you have 500 tasks each with 10 resources. You need to solve each of these tasks (concurrently? sequentially? does it matter>) as fast as possible. 
+Say you are a cloud engineer and need to implement an algorithm for CPU/GPU utilization. Which algorithm are you going to choose?
+
+Experimental setup — instance generation, solvers, what you measured
+n=500 means 500 tasks, with 10 resouerces = 5000 decision variables 
+note this is the max my computer could handle before crashing so lol yea couldnt do any better wihtin the budget/fund of this course
+Results — table/plots
+Discussion — tie results back to theory, how real solvers (CPLEX/Gurobi) handle hard cases
+Conclusion — conjecture refuted
+
+
+
+Introduction
+
+This project investigates the practical performance of the Simplex method compared to modern interior-point and HiGHS-based solvers on a scheduling linear program. The working conjecture is:
+
+"In terms of performance, the Simplex Method is not a competitive option for solving LPs in practice."
+
+The goal of the assignment is to test this claim empirically on a family of synthetic scheduling instances and to relate the results to the theoretical literature (Dantzig, Klee–Minty, Karmarkar, Spielman & Teng).
+
+Problem and model
+
+We model a resource-allocation scheduling LP with n jobs and m resources. For each job i and resource r there is a decision variable x_{i,r} in [0,1], so the total number of decision variables is n * m. Constraints enforce per-resource capacities and per-job demand (equality constraints). In the experiments reported here m = 10.
+
+The label `n=500` therefore means `n_jobs = 500` (500 tasks). With `n_resources = 10` this yields `n_vars = 500 * 10 = 5000` variables.
+
+Experimental setup
+
+Instances were generated with `generate_instances.py` at sizes n = 10, 50, 100, 500 and 1000 (files saved under `scheduling-lp-benchmark/instances`). We solve each instance with `scipy.optimize.linprog` using three backends: SciPy's `revised simplex` implementation (the textbook-style revised simplex exposed by SciPy), HiGHS dual/simplex (`highs` or shown as "highs (simplex)"), and HiGHS interior-point (`highs-ipm`). We record solve time and iteration counts; results are in `scheduling-lp-benchmark/results/` and the combined report figure is `scheduling-lp-benchmark/plots/time_vs_njobs_n=500.png`.
+
+Notes on runs and machine limits
+
+The `n=1000` run in this experiment was performed only with the HiGHS backends; the SciPy revised-simplex results are available only up to `n=500` in our record. On the machine used for these experiments the `n=500` problem (5000 variables) was the largest size run with SciPy's revised-simplex without failure.
+
+Key measured results (summary)
+
+- For `n=500`: SciPy revised-simplex took about 866 seconds, HiGHS (simplex) took ~0.16 seconds, and HiGHS IPM took ~0.048 seconds. These median timings are shown in the report figure at `scheduling-lp-benchmark/plots/time_vs_njobs_n=500.png`.
+
+Interpretation and discussion
+
+The extremely poor scaling of SciPy's revised-simplex on these equality-constrained scheduling instances is notable, but should not be taken as a statement about the Simplex algorithm class in industry. Industrial simplex implementations (CPLEX, Gurobi, commercial HiGHS builds) include many algorithmic engineering improvements — presolve, stable numeric factorizations, advanced pricing, degeneracy handling — that dramatically change practical performance. Our experiments show that out-of-the-box SciPy's revised-simplex implementation is not competitive here, while HiGHS (both simplex and IPM) is orders of magnitude faster on these instances. This supports the report's conclusion that implementation details and algorithmic engineering, not the theoretical worst-case complexity alone, determine practical solver performance.
+Keep in mind that this implementation of the revised simplex method (scipy.optimize linprog(revised_simplex)) is known for being slower specifically on problems with larger amounts of equality constraints; however for the purpose of this project in the scope of CSC445 Assignment 1 I find it acceptable to use it as a comparison measure of how unoptimized, non-algorithmically-engineered versions of the simplex method would perform comparitively to others, to demonstrate how it's not really about the simplex method not being competative in modern practice, but how it is designed and implemented programatically.
+
+Sections that follow in this document expand the theoretical background, provide the formal LP formulation used to generate instances, give full experimental details and tables, and discuss implications for solver choice in practice.
