@@ -1,8 +1,3 @@
-"""Benchmark LP solvers using scipy.optimize.linprog.
-
-Usage examples:
-  python benchmark.py --instances instances --out results/results.csv
-"""
 import os
 import time
 import argparse
@@ -26,7 +21,7 @@ def load_instance(path):
     return inst
 
 
-def run_solver(inst, method):
+def run_solver(inst, solve_method):
     c = inst["c"]
     A_ub = inst["A_ub"]
     b_ub = inst["b_ub"]
@@ -34,18 +29,8 @@ def run_solver(inst, method):
     b_eq = inst["b_eq"]
     bounds = [(0, 1)] * c.size
 
-    # Map user-facing labels to solver backends
-    method_label = method
-    key = (method_label or "").lower()
-    if key in ("revised simplex method", "revised simplex", "simplex", "simplex method"):
-        actual_method = "revised simplex"
-    elif key in ("highs (simplex)", "highs", "highs-simplex"):
-        actual_method = "highs"
-    else:
-        actual_method = method_label
-
     t0 = time.perf_counter()
-    res = linprog(c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=bounds, method=actual_method)
+    res = linprog(c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=bounds, method=solve_method)
     t1 = time.perf_counter()
     runtime = t1 - t0
     nit = res.get("nit", None)
@@ -58,7 +43,7 @@ def run_solver(inst, method):
     }
 
 
-def benchmark_dir(inst_dir, out_csv, methods=("revised simplex method", "highs (simplex)", "highs-ipm")):
+def benchmark_dir(inst_dir, out_csv, methods=("revised-simplex", "highs-ds", "highs-ipm")):
     os.makedirs(os.path.dirname(out_csv), exist_ok=True)
     files = sorted([f for f in os.listdir(inst_dir) if f.endswith('.npz')])
     rows = []
@@ -68,7 +53,7 @@ def benchmark_dir(inst_dir, out_csv, methods=("revised simplex method", "highs (
         for m in methods:
             print(f"Running {m} on {f}...")
             try:
-                r = run_solver(inst, method=m)
+                r = run_solver(inst, solve_method=m)
             except Exception as e:
                 r = {"success": False, "status": None, "message": str(e), "time_s": None, "nit": None}
             row = {
@@ -117,6 +102,7 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--instances", default="instances")
     p.add_argument("--out", default="results/results.csv")
-    p.add_argument("--methods", nargs="+", default=["revised simplex method", "highs (simplex)", "highs-ipm"])
+    p.add_argument("--methods", nargs="+", default=["revised-simplex", "highs-ds", "highs-ipm"],
+                   help="Solver methods to run. Valid values: revised-simplex, highs-ds, highs-ipm")
     args = p.parse_args()
     benchmark_dir(args.instances, args.out, methods=tuple(args.methods))

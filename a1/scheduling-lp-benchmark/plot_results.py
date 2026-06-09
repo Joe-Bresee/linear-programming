@@ -1,12 +1,3 @@
-"""Plot benchmark results from CSV and save figures into `plots/`.
-
-Generates:
-- `time_vs_njobs.png`: median solve time vs n_jobs per solver (log y-scale)
-- `iters_vs_njobs.png`: median iteration count vs n_jobs per solver
-
-Usage:
-  python plot_results.py --results results/results.csv --out-dir plots
-"""
 import os
 import argparse
 import pandas as pd

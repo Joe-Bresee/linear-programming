@@ -1,7 +1,3 @@
-"""Generate LP instances for GPU/CPU scheduling benchmarking.
-
-Creates instances saved as compressed numpy files in `instances/`.
-"""
 import os
 import json
 import numpy as np
@@ -29,7 +25,6 @@ def generate_instance(n_jobs, n_resources=10, seed=42):
         A_eq[i, i * n_resources:(i + 1) * n_resources] = 1.0
     demand = rng.uniform(0.2 * n_resources, 0.8 * n_resources, size=(n_jobs,))
 
-    # Bounds: 0 <= x_ij <= 1 (fractional allocation)
     bounds = [(0.0, 1.0)] * n_vars
 
     instance = {

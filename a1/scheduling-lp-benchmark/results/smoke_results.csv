@@ -1,7 +1,0 @@
-instance,n_jobs,n_resources,method,success,status,message,time_s,nit
-instance_n10_r10.npz,10,10,revised simplex method,True,0,Optimization terminated successfully.,0.025635311998485122,46
-instance_n10_r10.npz,10,10,highs (simplex),True,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.018399214000965003,0
-instance_n10_r10.npz,10,10,highs-ipm,True,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0020579580013873056,0
-instance_n50_r10.npz,50,10,revised simplex method,True,0,Optimization terminated successfully.,7.465247793996241,307
-instance_n50_r10.npz,50,10,highs (simplex),True,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.004871726996498182,0
-instance_n50_r10.npz,50,10,highs-ipm,True,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.008822032003081404,0
