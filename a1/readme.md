@@ -72,7 +72,7 @@ For each (size, backend) pair, five independently generated instances were solve
 
 ### 5.2 Solve Time vs. Problem Size
 
-![Median solve time vs n_jobs](time_vs_njobs_combined.png)
+![Median solve time vs n_jobs](a1/scheduling-lp-benchmark/plots/time_vs_njobs_combined.png)
 *Figure 1: Median solve time (log scale) vs. number of jobs for all three solver backends, each size measured over 5 independently seeded instances. The revised-simplex curve ends at $n=100$ due to machine limits. HiGHS simplex and HiGHS IPM are nearly the same across all tested sizes, reflecting the importance of HiGHS.*
 
 ### 5.3 Key Observations
