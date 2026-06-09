@@ -1,9 +1,0 @@
-TODO:
-
-large instances didn't work?
-
-a1/Readme.md
-
-look over latex document
-
-parts 2 and 3
