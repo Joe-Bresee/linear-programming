@@ -1,0 +1,16 @@
+instance,n_jobs,n_resources,method,success,status,message,time_s,nit
+instance_n100_r10_s0.npz,100,10,revised-simplex,True,0,Optimization terminated successfully.,92.13191158599511,596
+instance_n100_r10_s1.npz,100,10,revised-simplex,True,0,Optimization terminated successfully.,121.0644648180023,593
+instance_n100_r10_s2.npz,100,10,revised-simplex,True,0,Optimization terminated successfully.,74.08537371098646,581
+instance_n100_r10_s3.npz,100,10,revised-simplex,True,0,Optimization terminated successfully.,92.51648528399528,552
+instance_n100_r10_s4.npz,100,10,revised-simplex,True,0,Optimization terminated successfully.,122.3356449349958,661
+instance_n10_r10_s0.npz,10,10,revised-simplex,True,0,Optimization terminated successfully.,0.011989672988420352,57
+instance_n10_r10_s1.npz,10,10,revised-simplex,True,0,Optimization terminated successfully.,0.010358760016970336,50
+instance_n10_r10_s2.npz,10,10,revised-simplex,True,0,Optimization terminated successfully.,0.018034234002698213,55
+instance_n10_r10_s3.npz,10,10,revised-simplex,True,0,Optimization terminated successfully.,0.02922463501454331,69
+instance_n10_r10_s4.npz,10,10,revised-simplex,True,0,Optimization terminated successfully.,0.012291845981962979,60
+instance_n50_r10_s0.npz,50,10,revised-simplex,True,0,Optimization terminated successfully.,28.86801835199003,326
+instance_n50_r10_s1.npz,50,10,revised-simplex,True,0,Optimization terminated successfully.,47.23371657700045,289
+instance_n50_r10_s2.npz,50,10,revised-simplex,True,0,Optimization terminated successfully.,37.97628262100625,267
+instance_n50_r10_s3.npz,50,10,revised-simplex,True,0,Optimization terminated successfully.,45.83693807100644,282
+instance_n50_r10_s4.npz,50,10,revised-simplex,True,0,Optimization terminated successfully.,45.1082579609938,305

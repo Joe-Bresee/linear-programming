@@ -29,8 +29,19 @@ def run_solver(inst, solve_method):
     b_eq = inst["b_eq"]
     bounds = [(0, 1)] * c.size
 
+    valid_map = {
+        "revised-simplex": "revised simplex",
+        "highs-ds": "highs-ds",
+        "highs-ipm": "highs-ipm",
+    }
+    if solve_method not in valid_map:
+        raise ValueError(
+            f"Unknown solver '{solve_method}'. Valid methods: {', '.join(valid_map.keys())}"
+        )
+    actual_method = valid_map[solve_method]
+
     t0 = time.perf_counter()
-    res = linprog(c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=bounds, method=solve_method)
+    res = linprog(c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=bounds, method=actual_method)
     t1 = time.perf_counter()
     runtime = t1 - t0
     nit = res.get("nit", None)
