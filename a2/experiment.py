@@ -1,31 +1,16 @@
 """
-CSC 445 Assignment 2, Part 1 - Real primal/dual pair experiment.
+CSC 445 Assignment 2, Part 1 - Multi-instance row/column ratio experiment.
 
-Downloads the Netlib fit1/fit2 primal-dual LP pairs from the SuiteSparse
-Matrix Collection and times HiGHS dual-simplex solves on each, with
-presolve on and off, in-process (no subprocess overhead like the
-GLPK_CMD/PuLP approach had).
-
-Pairs (documented by Bob Fourer / Netlib as genuine primal-dual pairs
-of the same underlying piecewise-linear data-fitting model):
-    fit1d ( 24 x   1049)  <->  fit1p ( 627 x  1677)
-    fit2d ( 25 x  10524)  <->  fit2p (3000 x 13525)
-
-Each .mat file bundles fields A, b, c, lo, hi (and z0, the known
-optimal objective value, useful as a correctness sanity check) such
-that the LP is:
-
-    minimize c^T x   s.t.   A x = b,   lo <= x <= hi
+Benchmarks HiGHS dual-simplex solve time (in-process, presolve on/off)
+across a spread of real Netlib LP instances -- from near-square through
+moderately wide to extremely wide -- plus the two genuine primal/dual
+pairs (fit1d/fit1p, fit2d/fit2p). All instances stored in standard form
+(Ax = b, lo <= x <= hi) must have cols >= rows for full row rank, so
+"tall" (rows > cols) instances don't exist here; this set instead spans
+the full range from near-square out to extreme.
 
 Requires: numpy, scipy
     pip install numpy scipy --break-system-packages
-
-NOTE: I could not run this myself (no network access in my sandbox) --
-this is built directly against the field layout documented on the
-SuiteSparse Matrix Collection pages for these instances. If the field
-names come back different when you actually load a file, print
-`mat["Problem"].__dict__` or `dir(mat["Problem"])` to see what's
-really there and adjust load_instance() accordingly.
 """
 
 import os
@@ -37,7 +22,22 @@ from scipy.io import loadmat
 from scipy.optimize import linprog
 
 BASE_URL = "https://sparse.tamu.edu/mat/LPnetlib/{}.mat"
-INSTANCES = ["lp_fit1d", "lp_fit1p", "lp_fit2d", "lp_fit2p", "lp_agg", "lp_cre_d"]
+
+# Ordered roughly by cols:rows ratio, near-square to extreme wide.
+INSTANCES = [
+    "lp_brandy",    # 220 x 303      ~1.38:1
+    "lp_agg",       # 488 x 615      ~1.26:1
+    "lp_afiro",     # 27 x 51        ~1.9:1
+    "lp_25fv47",    # 821 x 1876     ~2.3:1
+    "lp_cre_a",     # 3516 x 7248    ~2.1:1
+    "lp_fit1p",     # 627 x 1677     ~2.7:1  (real dual pair w/ fit1d)
+    "lp_80bau3b",   # 2262 x 12061   ~5.3:1
+    "lp_cre_d",     # 8926 x 73948   ~8.3:1
+    "lp_fit1d",     # 24 x 1049      ~44:1   (real dual pair w/ fit1p)
+    "lp_fit2p",     # 3000 x 13525   ~4.5:1  (real dual pair w/ fit2d)
+    "lp_fit2d",     # 25 x 10524     ~421:1  (real dual pair w/ fit2p)
+]
+
 DATA_DIR = "netlib_lp_data"
 N_TRIALS = 5          # repeat each solve, report the median (timing is noisy)
 PRESOLVE_SETTINGS = [True, False]
@@ -60,6 +60,10 @@ def load_instance(path):
     SuiteSparse .mat files store everything inside a top-level 'Problem'
     struct. loadmat with squeeze_me=True, struct_as_record=False lets us
     access fields by name: mat['Problem'].A, .b, .c, .lo, .hi, .z0
+
+    Fields are split inconsistently across instances: b sits directly on
+    Problem, while c/lo/hi/z0 sit under Problem.aux. Check both locations
+    per field rather than assuming one source holds everything.
     """
     mat = loadmat(path, squeeze_me=True, struct_as_record=False)
     prob = mat["Problem"]
@@ -67,27 +71,27 @@ def load_instance(path):
     if hasattr(A, "tocsc"):
         A = A.tocsc()
 
-    def field(name):
-        # Standard fields like 'b' are usually on the top-level prob.
+    aux = getattr(prob, "aux", None)
+
+    def field(name, required=True):
         if hasattr(prob, name):
             return getattr(prob, name)
-        # LP-specific fields like 'c', 'lo', 'hi' are usually in prob.aux.
-        if hasattr(prob, "aux") and hasattr(prob.aux, name):
-            return getattr(prob.aux, name)
-            
-        raise AttributeError(f"Field '{name}' not found on Problem or Problem.aux.")
+        if aux is not None and hasattr(aux, name):
+            return getattr(aux, name)
+        if required:
+            prob_fields = getattr(prob, "_fieldnames", dir(prob))
+            aux_fields = getattr(aux, "_fieldnames", dir(aux)) if aux is not None else None
+            raise AttributeError(
+                f"Field '{name}' not found on Problem or Problem.aux. "
+                f"Problem fields: {prob_fields}. Problem.aux fields: {aux_fields}"
+            )
+        return None
 
     b = np.asarray(field("b"), dtype=float).ravel()
     c = np.asarray(field("c"), dtype=float).ravel()
     lo = np.asarray(field("lo"), dtype=float).ravel()
     hi = np.asarray(field("hi"), dtype=float).ravel()
-    
-    # z0 is optional, so we handle it gracefully if it's entirely missing
-    try:
-        z0 = field("z0")
-    except AttributeError:
-        z0 = None
-        
+    z0 = field("z0", required=False)
     return A, b, c, lo, hi, z0
 
 
@@ -105,8 +109,9 @@ def solve_once(A, b, c, lo, hi, presolve):
 
 def benchmark_instance(name, path):
     A, b, c, lo, hi, z0 = load_instance(path)
-    print(f"\n{name}: {A.shape[0]} rows x {A.shape[1]} cols "
-          f"nnz={getattr(A, 'nnz', 'n/a')}  known_optimal={z0}")
+    m, n = A.shape
+    print(f"\n{name}: {m} rows x {n} cols "
+          f"(ratio {n/m:.2f}:1)  nnz={getattr(A, 'nnz', 'n/a')}  known_optimal={z0}")
 
     rows = []
     for presolve in PRESOLVE_SETTINGS:
@@ -118,7 +123,7 @@ def benchmark_instance(name, path):
             status = res.status
             obj = res.fun
         row = {
-            "instance": name, "m": int(A.shape[0]), "n": int(A.shape[1]),
+            "instance": name, "m": int(m), "n": int(n), "ratio": n / m,
             "presolve": presolve,
             "median_time_s": float(np.median(times)),
             "iterations": iters, "status": status,
@@ -133,8 +138,11 @@ def benchmark_instance(name, path):
 def main():
     all_rows = []
     for name in INSTANCES:
-        path = download_instance(name)
-        all_rows.extend(benchmark_instance(name, path))
+        try:
+            path = download_instance(name)
+            all_rows.extend(benchmark_instance(name, path))
+        except Exception as e:
+            print(f"!! Skipping {name}: {e}")
 
     with open("fit_primal_dual_results.json", "w") as f:
         json.dump(all_rows, f, indent=2)

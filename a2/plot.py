@@ -1,10 +1,11 @@
 """
-Plots the results from fit_primal_dual_benchmark.py (fit_primal_dual_results.json).
+Plots the results from experiment.py (fit_primal_dual_results.json).
 
-Produces a grouped bar chart: median solve time (log scale) for each of
-the four instances (fit1d, fit1p, fit2d, fit2p), with presolve on/off
-shown side by side, so the row-count effect and the presolve effect can
-both be read off the same figure.
+Primary figure: median solve time vs. number of rows (both log scale),
+across every tested instance -- this is the direct test of "solve time
+tracks constraint count", using real applications spanning near-square
+to extremely wide. Presolve on/off shown as separate series. Points are
+labeled with instance name and its cols:rows ratio.
 
 Usage:
     python plot_results.py [path/to/fit_primal_dual_results.json]
@@ -19,58 +20,50 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 RESULTS_PATH = sys.argv[1] if len(sys.argv) > 1 else "fit_primal_dual_results.json"
-ORDER = ["lp_fit1d", "lp_fit1p", "lp_fit2d", "lp_fit2p"]
 
 
 def load_results(path):
     with open(path) as f:
         data = json.load(f)
-    by_instance = {name: {} for name in ORDER}
-    rows = {}
+    by_instance = {}
     for row in data:
-        name = row["instance"]
-        by_instance.setdefault(name, {})[row["presolve"]] = row["median_time_s"]
-        rows[name] = row["m"]
-    return by_instance, rows
+        by_instance.setdefault(row["instance"], {"m": row["m"], "n": row["n"],
+                                                   "ratio": row["ratio"]})
+        by_instance[row["instance"]][row["presolve"]] = row["median_time_s"]
+    return by_instance
 
 
 def main():
-    by_instance, rows = load_results(RESULTS_PATH)
-    present = [name for name in ORDER if name in by_instance]
-    if not present:
-        present = list(by_instance.keys())
+    by_instance = load_results(RESULTS_PATH)
+    names = sorted(by_instance, key=lambda k: by_instance[k]["m"])
 
-    labels = [f"{name.replace('lp_', '')}\n({rows[name]} rows)" for name in present]
-    on_times = [by_instance[name].get(True) for name in present]
-    off_times = [by_instance[name].get(False) for name in present]
+    rows_m = np.array([by_instance[n]["m"] for n in names])
+    on_times = np.array([by_instance[n].get(True, np.nan) for n in names])
+    off_times = np.array([by_instance[n].get(False, np.nan) for n in names])
 
-    x = np.arange(len(present))
-    width = 0.35
+    fig, ax = plt.subplots(figsize=(9, 6.5))
+    ax.scatter(rows_m, on_times, s=70, color="#4C72B0", label="presolve on", zorder=3)
+    ax.scatter(rows_m, off_times, s=70, color="#DD8452", marker="^", label="presolve off", zorder=3)
 
-    fig, ax = plt.subplots(figsize=(8, 5.5))
-    bars_on = ax.bar(x - width / 2, on_times, width, label="presolve on", color="#4C72B0")
-    bars_off = ax.bar(x + width / 2, off_times, width, label="presolve off", color="#DD8452")
+    for n, m_val, t_on in zip(names, rows_m, on_times):
+        ratio = by_instance[n]["ratio"]
+        label = f"{n.replace('lp_', '')}\n({ratio:.1f}:1)"
+        ax.annotate(label, (m_val, t_on), textcoords="offset points",
+                    xytext=(6, 6), fontsize=8)
 
+    ax.set_xscale("log")
     ax.set_yscale("log")
+    ax.set_xlabel("Number of rows / constraints (log scale)")
     ax.set_ylabel("Median solve time (s, log scale)")
-    ax.set_xticks(x)
-    ax.set_xticklabels(labels)
-    ax.set_title("Solve time: real Netlib primal/dual pairs (HiGHS dual simplex)")
+    ax.set_title("Solve time vs. row count across real Netlib LP instances\n"
+                  "(HiGHS dual simplex; labels show cols:rows ratio)")
+    ax.grid(which="both", linestyle="--", alpha=0.4)
     ax.legend()
-    ax.grid(axis="y", which="both", linestyle="--", alpha=0.4)
-
-    for bars in (bars_on, bars_off):
-        for b in bars:
-            h = b.get_height()
-            if h is None:
-                continue
-            ax.annotate(f"{h:.4f}", (b.get_x() + b.get_width() / 2, h),
-                        textcoords="offset points", xytext=(0, 3), ha="center", fontsize=8)
 
     fig.tight_layout()
-    fig.savefig("fit_primal_dual_timing.png", dpi=200)
-    fig.savefig("fit_primal_dual_timing.pdf")
-    print("Saved fit_primal_dual_timing.png and fit_primal_dual_timing.pdf")
+    fig.savefig("solve_time_vs_rows.png", dpi=200)
+    fig.savefig("solve_time_vs_rows.pdf")
+    print("Saved solve_time_vs_rows.png and solve_time_vs_rows.pdf")
 
 
 if __name__ == "__main__":
