@@ -1,0 +1,10 @@
+{
+  "DENSITY": 0.02,
+  "BASE_DIM": 200,
+  "RATIO_MAX": 80.0,
+  "N_RATIO_POINTS": 8,
+  "N_SEEDS": 2,
+  "N_TIMING_REPEATS": 2,
+  "CORRECTNESS_TOL": 1e-6,
+  "PRESOLVE_SETTINGS": [false, true]
+}

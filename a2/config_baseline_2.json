@@ -1,0 +1,8 @@
+{
+  "DENSITY": 0.01,
+  "BASE_DIM": 100,
+  "RATIO_MAX": 100,
+  "N_RATIO_POINTS": 8,
+  "N_SEEDS": 5,
+  "PRESOLVE_SETTINGS": [false, true]
+}
