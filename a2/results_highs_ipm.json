@@ -1,0 +1,98 @@
+[
+  {
+    "instance": "lp_fit1d",
+    "m": 24,
+    "n": 1049,
+    "method": "highs-ipm",
+    "presolve": true,
+    "median_time_s": 0.027176308998605236,
+    "iterations": 18,
+    "status": 0,
+    "objective": -9146.378092420928,
+    "known_optimal": 0.0
+  },
+  {
+    "instance": "lp_fit1d",
+    "m": 24,
+    "n": 1049,
+    "method": "highs-ipm",
+    "presolve": false,
+    "median_time_s": 0.020424714995897375,
+    "iterations": 18,
+    "status": 0,
+    "objective": -9146.378092420928,
+    "known_optimal": 0.0
+  },
+  {
+    "instance": "lp_fit1p",
+    "m": 627,
+    "n": 1677,
+    "method": "highs-ipm",
+    "presolve": true,
+    "median_time_s": 0.030677919996378478,
+    "iterations": 17,
+    "status": 0,
+    "objective": 9146.378092420937,
+    "known_optimal": 0.0
+  },
+  {
+    "instance": "lp_fit1p",
+    "m": 627,
+    "n": 1677,
+    "method": "highs-ipm",
+    "presolve": false,
+    "median_time_s": 0.02871086900267983,
+    "iterations": 17,
+    "status": 0,
+    "objective": 9146.378092420937,
+    "known_optimal": 0.0
+  },
+  {
+    "instance": "lp_fit2d",
+    "m": 25,
+    "n": 10524,
+    "method": "highs-ipm",
+    "presolve": true,
+    "median_time_s": 0.2844375429995125,
+    "iterations": 23,
+    "status": 0,
+    "objective": -68464.29329383207,
+    "known_optimal": 0.0
+  },
+  {
+    "instance": "lp_fit2d",
+    "m": 25,
+    "n": 10524,
+    "method": "highs-ipm",
+    "presolve": false,
+    "median_time_s": 0.2335021280014189,
+    "iterations": 22,
+    "status": 0,
+    "objective": -68464.2932938321,
+    "known_optimal": 0.0
+  },
+  {
+    "instance": "lp_fit2p",
+    "m": 3000,
+    "n": 13525,
+    "method": "highs-ipm",
+    "presolve": true,
+    "median_time_s": 0.26915702700352995,
+    "iterations": 20,
+    "status": 0,
+    "objective": 68464.29329383218,
+    "known_optimal": 0.0
+  },
+  {
+    "instance": "lp_fit2p",
+    "m": 3000,
+    "n": 13525,
+    "method": "highs-ipm",
+    "presolve": false,
+    "median_time_s": 0.26029894299426815,
+    "iterations": 20,
+    "status": 0,
+    "objective": 68464.29329383218,
+    "known_optimal": 0.0
+  }
+]
